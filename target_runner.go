@@ -28,7 +28,10 @@ func RunTargetByName(targetName string, targets []Target, stopRunning bool, para
 
 	log.Infof("Running target \"%v\"", targetName)
 
-	target.Run(params, stopRunning)
+	var failure = target.Run(params, stopRunning)
+	if failure {
+		return errors.New(fmt.Sprintf("Error running target \"%v\"", targetName))
+	}
 	return nil
 }
 
@@ -38,5 +41,5 @@ func FindTargetByTargetName(targetName string, targets []Target) (Target, error)
 			return targets[targetIndex], nil
 		}
 	}
-	return Target{}, errors.New("failed to find target")
+	return Target{}, errors.New("Failed to find target")
 }
