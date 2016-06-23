@@ -9,19 +9,19 @@ import (
 )
 
 func LoadTargets(filename string) ([]Target, error) {
-	data, error := ioutil.ReadFile(filename)
-	if error != nil {
-		panic(error)
+	data, err := ioutil.ReadFile(filename)
+	if err != nil {
+		return nil, err
 	}
 
-	yaml, error := simpleyaml.NewYaml(data)
-	if error != nil {
-		panic(error)
+	yaml, err := simpleyaml.NewYaml(data)
+	if err != nil {
+		return nil, err
 	}
 
 	m, err := yaml.Map()
 	if err != nil {
-		panic(err)
+		return nil, err
 	}
 
 	var targets []Target
@@ -32,7 +32,7 @@ func LoadTargets(filename string) ([]Target, error) {
 		targetName := simplifyTargetName(key.(string))
 		targetParams, targetParamErr := findParametersInTargetName(key.(string))
 		if targetParamErr != nil {
-			panic(targetParamErr)
+			return nil, targetParamErr
 		}
 
 		for i := range value {

@@ -3,20 +3,13 @@ package plalib
 import (
 	"errors"
 	"fmt"
-	// "strings"
 )
 
-func RunTargetByName(targetName string, targets []Target, stopRunning bool, params []string) error {
-
+func RunTargetByName(targetName string, targets []Target, stopRunning bool, params []string) *PlaError {
 	target, error := FindTargetByTargetName(targetName, targets)
 	if error != nil {
-		err := fmt.Sprintf("Error: Invalid value: Target \"%v\" not present in Plafile.yml.\n", targetName)
-		log.Errorf(err)
-		// fmt.Println("Valid targets are:")
-		// for tIndex := range targets {
-		// fmt.Println("  -", targets[tIndex].Name)
-		// }
-		return errors.New(err)
+		log.Errorf("%v", *error)
+		return error
 	}
 
 	// if len(params) < len(target.Parameters) {
@@ -30,16 +23,23 @@ func RunTargetByName(targetName string, targets []Target, stopRunning bool, para
 
 	var failure = target.Run(params, stopRunning)
 	if failure {
-		return errors.New(fmt.Sprintf("Error running target \"%v\"", targetName))
+		return &PlaError{
+			errors.New(fmt.Sprintf("Error running target \"%v\". Please check the logs for more information.", targetName)),
+			TARGET_RUN_ERROR,
+		}
 	}
 	return nil
 }
 
-func FindTargetByTargetName(targetName string, targets []Target) (Target, error) {
+func FindTargetByTargetName(targetName string, targets []Target) (Target, *PlaError) {
 	for targetIndex := range targets {
 		if targets[targetIndex].Name == targetName {
 			return targets[targetIndex], nil
 		}
 	}
-	return Target{}, errors.New("Failed to find target")
+
+	return Target{}, &PlaError{
+		errors.New(fmt.Sprintf("Invalid value: Target \"%v\" not present in Plafile.yml.", targetName)),
+		TARGET_NOT_FOUND,
+	}
 }
